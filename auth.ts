@@ -19,26 +19,21 @@ export const {
   events: {
     async linkAccount({ user }) {
       await db.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          emailVerified: new Date()
-        },
+        where: { id: user.id },
+        data: { emailVerified: new Date() },
       });
     },
   },
+
   callbacks: {
-    async signIn({ user }) {
-      if (!user.id) {
-        return false;
-      }
+    async signIn({ user, account }) {
+      // Allow OAuth without email verification
+      if (account?.provider !== "credentials") return true;
 
-      const existingUser = await getUserById(user.id);
+      const existingUser = await getUserById(user.id ?? "");
 
-      if (!existingUser || !existingUser.emailVerified) {
-        return false;
-      }
+      // Prevent sign in without email verification
+      if (!existingUser?.emailVerified) return false;
 
       return true;
     },
@@ -53,15 +48,11 @@ export const {
       return session;
     },
     async jwt({ token }) {
-      if (!token.sub) {
-        return token;
-      }
+      if (!token.sub) return token;
 
       const existingUser = await getUserById(token.sub);
 
-      if (!existingUser) {
-        return token;
-      }
+      if (!existingUser) return token;
 
       token.role = existingUser.role;
 
