@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "../form-success";
-import { login } from "@/actions/login";
+import { reset } from "@/actions/reset";
 import { ResetSchema } from "@/schemas";
 
 export const ResetForm = () => {
@@ -40,13 +40,13 @@ export const ResetForm = () => {
 
     console.log(values)
 
-    // startTransition(() => {
-    //   login(values)
-    //     .then((data) => {
-    //       setError(data?.error);
-    //       setSuccess(data?.success);
-    //     })
-    // })
+    startTransition(() => {
+      reset(values)
+        .then((data) => {
+          setError(data?.error);
+          setSuccess(data?.success);
+        })
+    })
   };
 
   return (
