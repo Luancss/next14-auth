@@ -3,7 +3,7 @@
 import { CardWrapper } from "./card-wrapper";
 import { BeatLoader } from "react-spinners";
 import { useSearchParams } from "next/navigation";
-import {newVerification} from "@/actions/new-verification";
+import { newVerification } from "@/actions/new-verification";
 import { useCallback, useEffect, useState } from "react";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
@@ -17,6 +17,8 @@ export const NewVerificationForm = () => {
   const token = searchParams.get("token");
 
   const onSubmit = useCallback(() => {
+    if (success || error) return;
+
     if (!token) {
       setError("Missing token!");
       return;
@@ -30,7 +32,7 @@ export const NewVerificationForm = () => {
       .catch((error) => {
         setError("Something went wrong!");
       });
-  }, [token]);
+  }, [token, success, error]);
 
   useEffect(() => {
     onSubmit();
@@ -45,7 +47,7 @@ export const NewVerificationForm = () => {
       <div className="w-full flex justify-center items-center">
         {!success && !error && <BeatLoader />}
         <FormSuccess message={success} />
-        <FormError message={error} />
+        {!success && <FormError message={error} />}
       </div>
     </CardWrapper>
   );
