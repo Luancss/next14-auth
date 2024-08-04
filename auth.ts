@@ -44,6 +44,10 @@ export const {
         if (!twoFactorConfirmation) {
           return false;
         }
+
+        await db.twoFactorConfirmation.delete({
+          where: { id: twoFactorConfirmation.id },
+        })
       }
 
       return true;
