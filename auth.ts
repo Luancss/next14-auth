@@ -5,6 +5,7 @@ import { getUserById } from "./data/user";
 import { db } from "./lib/db";
 import authConfig from "./auth.config";
 import { UserRole } from "@prisma/client";
+import { getTwoFactorTokenByUserId } from "@/data/two-factor-token";
 
 export const {
   handlers: { GET, POST },
@@ -34,6 +35,20 @@ export const {
 
       // Prevent sign in without email verification
       if (!existingUser?.emailVerified) return false;
+
+      if (existingUser.isTwoFactorEnabled) {
+        const twoFactorConfirmation = await getTwoFactorTokenByUserId(
+          existingUser.id
+        );
+
+        if (!twoFactorConfirmation) {
+          return false;
+        }
+
+        await db.twoFactorConfirmation.delete({
+          where: { id: twoFactorConfirmation.id },
+        })
+      }
 
       return true;
     },
