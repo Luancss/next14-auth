@@ -7,6 +7,7 @@ export const publicRoutes = [
   "/",
   "auth/new-verification",
   "/settings",
+  "/server",
   // TOOD: Change public route settings
 ];
 
