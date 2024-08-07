@@ -9,6 +9,8 @@ import { settings } from "@/actions/settings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
+import { FormSuccess } from "@/components/form-success";
+import { FormError } from "@/components/form-error";
 
 import {
   Form,
@@ -35,7 +37,10 @@ const SettingsPage = () => {
   const form = useForm<z.infer<typeof SettingsSchema>>({
     resolver: zodResolver(SettingsSchema),
     defaultValues: {
+      password: undefined,
+      newPassword: undefined,
       name: user?.name || "",
+      email: user?.email || "",
     },
   });
 
@@ -76,17 +81,70 @@ const SettingsPage = () => {
                         placeholder="John Doe"
                         disabled={isPending}
                         {...field}
+                        type="text"
                       />
                     </FormControl>
-                    <FormDescription>
-                      This is how others will see you on the site.
-                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="john.doe@examplle.com"
+                        disabled={isPending}
+                        {...field}
+                        type="email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="******"
+                        disabled={isPending}
+                        type="password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="******"
+                        disabled={isPending}
+                        type="password"
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-
+            <FormError message={error} />
+            <FormSuccess message={success} />
             <Button type="submit" disabled={isPending}>
               {isPending ? "Saving..." : "Save"}
             </Button>
