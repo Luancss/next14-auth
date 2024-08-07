@@ -9,6 +9,7 @@ export const publicRoutes = [
   "/settings",
   "/server",
   "/client",
+  "/admin"
   // TOOD: Change public route settings
 ];
 
