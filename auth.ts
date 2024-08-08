@@ -1,12 +1,13 @@
-import NextAuth from "next-auth";
+import NextAuth, { type DefaultSession } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-
-import { getUserById } from "./data/user";
-import { db } from "./lib/db";
-import authConfig from "./auth.config";
 import { UserRole } from "@prisma/client";
-import { getTwoFactorTokenByUserId } from "@/data/two-factor-token";
+
+import { getUserById } from "@/data/user";
+
+import { db } from "@/lib/db";
+import authConfig from "@/auth.config";
 import { getAccountByUserId } from "./data/account";
+import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confimation";
 
 export const {
   handlers: { GET, POST },
@@ -38,17 +39,16 @@ export const {
       if (!existingUser?.emailVerified) return false;
 
       if (existingUser.isTwoFactorEnabled) {
-        const twoFactorConfirmation = await getTwoFactorTokenByUserId(
+        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
           existingUser.id
         );
 
-        if (!twoFactorConfirmation) {
-          return false;
-        }
+        if (!twoFactorConfirmation) return false;
 
+        // Delete two factor confirmation for next sign in
         await db.twoFactorConfirmation.delete({
           where: { id: twoFactorConfirmation.id },
-        })
+        });
       }
 
       return true;
@@ -63,10 +63,7 @@ export const {
       }
 
       if (session.user) {
-        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean; 
-      }
-
-      if (session.user) {
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
         session.user.name = token.name;
         session.user.email = token.email as string;
         session.user.isOAuth = token.isOAuth as boolean;
@@ -81,9 +78,9 @@ export const {
 
       if (!existingUser) return token;
 
-      const existingAccout = await getAccountByUserId(existingUser.id);
+      const existingAccount = await getAccountByUserId(existingUser.id);
 
-      token.isOAuth = !!existingAccout;
+      token.isOAuth = !!existingAccount;
       token.name = existingUser.name;
       token.email = existingUser.email;
       token.role = existingUser.role;
